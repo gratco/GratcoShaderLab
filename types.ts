@@ -1,3 +1,4 @@
+
 export enum UniformType {
   FLOAT = 'float',
   VEC2 = 'vec2',
@@ -70,6 +71,11 @@ varying vec2 vUv;
 uniform float iTime;
 uniform vec2 iResolution;
 uniform vec2 iMouse;
+
+// HLSL Standard aliases (Ensures auto-generated code works without explicit declaration)
+uniform float time;
+uniform vec2 resolution;
+uniform vec2 mouse;
 
 // User Uniforms will be injected here automatically by Three.js
 // We map mainImage to standard GLSL main()

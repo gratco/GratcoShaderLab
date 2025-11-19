@@ -26,6 +26,7 @@ function App() {
   const [prompt, setPrompt] = useState('');
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   // Parse uniforms when code changes
   useEffect(() => {
@@ -141,7 +142,11 @@ function App() {
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim()) {
+      // If empty, focus the textarea to guide the user
+      textAreaRef.current?.focus();
+      return;
+    }
     setIsGenerating(true);
     try {
       const newCode = await generateShaderCode(prompt, code);
@@ -275,6 +280,7 @@ function App() {
               Describe the visual effect you want to create. The AI will generate the HLSL code for you.
             </p>
             <textarea 
+              ref={textAreaRef}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               className="w-full bg-gray-950 border border-gray-700 rounded-lg p-3 text-sm text-white focus:ring-2 focus:ring-purple-500 focus:outline-none resize-none h-32"
@@ -289,7 +295,7 @@ function App() {
               </button>
               <button 
                 onClick={handleGenerate}
-                disabled={isGenerating || !prompt.trim()}
+                disabled={isGenerating}
                 className="px-6 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isGenerating ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />}

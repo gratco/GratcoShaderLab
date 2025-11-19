@@ -1,3 +1,4 @@
+
 import { UniformDefinition, UniformType, HLSL_PREAMBLE } from '../types';
 
 /**
@@ -50,11 +51,18 @@ export const assembleShader = (userCode: string): string => {
   // Remove HLSL semantics commonly found in pixel shaders to prevent GLSL compiler errors
   // e.g. float4 main(float2 uv : TEXCOORD) : SV_Target
   
-  const cleanedCode = userCode
+  let cleanedCode = userCode
     .replace(/:\s*SV_Target\d*/gi, "")
     .replace(/:\s*SV_Position\d*/gi, "")
     .replace(/:\s*TEXCOORD\d*/gi, "")
     .replace(/:\s*COLOR\d*/gi, "");
+
+  // Remove standard uniforms if user declared them (to avoid redefinition error with preamble)
+  // Matches: uniform float time; or uniform float2 resolution;
+  cleanedCode = cleanedCode
+    .replace(/^\s*uniform\s+\w+\s+time\s*;?/gm, "// [Built-in] uniform float time;")
+    .replace(/^\s*uniform\s+\w+\s+resolution\s*;?/gm, "// [Built-in] uniform float2 resolution;")
+    .replace(/^\s*uniform\s+\w+\s+mouse\s*;?/gm, "// [Built-in] uniform float2 mouse;");
 
   return `${HLSL_PREAMBLE}\n${cleanedCode}`;
 };
