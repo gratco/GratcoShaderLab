@@ -64,7 +64,6 @@ export const HLSL_PREAMBLE = `
 #define fmod mod
 #define tex2D texture
 #define static 
-#define const 
 
 // Standard inputs
 varying vec2 vUv;

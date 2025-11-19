@@ -16,6 +16,15 @@ export const generateShaderCode = async (prompt: string, currentCode: string): P
       - mainImage(float2 uv) returning float4
       - Automatic uniforms: time (float), resolution (float2)
       
+      STRICT GLSL SYNTAX RULES (CRITICAL):
+      1. FLOAT LITERALS: ALWAYS use decimal points. Use '0.0', '1.0'. NEVER use '0' or '1' for floats.
+      2. INITIALIZATION: Never assign a scalar to a vector. Use constructors: 'float3(0.0)'.
+      3. TYPE MIXING: Do NOT mix int and float in math. 'i + 0.5' is INVALID. Use 'float(i) + 0.5'.
+      4. LOOPS: 
+         - Use 'int' for loop iterators: 'for (int i = 0; i < 10; ++i)'.
+         - Loop bounds must be integers or constant expressions.
+         - When using 'i' in the loop body for math, CAST IT: 'float(i) / 10.0'.
+      
       You must output ONLY the HLSL code block. 
       Do not output the preamble.
       Do not output Markdown backticks.
@@ -30,6 +39,10 @@ export const generateShaderCode = async (prompt: string, currentCode: string): P
       
       float4 mainImage(float2 uv) {
         // ... code ...
+        for(int i = 0; i < 5; i++) {
+             float fi = float(i); // Explicit cast required
+             // ...
+        }
         return float4(col, 1.0);
       }
     `;

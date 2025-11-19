@@ -64,5 +64,13 @@ export const assembleShader = (userCode: string): string => {
     .replace(/^\s*uniform\s+\w+\s+resolution\s*;?/gm, "// [Built-in] uniform float2 resolution;")
     .replace(/^\s*uniform\s+\w+\s+mouse\s*;?/gm, "// [Built-in] uniform float2 mouse;");
 
+  // Auto-fix: float3 x = 0; -> float3 x = float3(0.0);
+  // Matches: float3 name = 0;
+  cleanedCode = cleanedCode.replace(/\b(float[234])\s+(\w+)\s*=\s*0\s*;/g, "$1 $2 = $1(0.0);");
+
+  // Auto-fix: float x = 0; -> float x = 0.0;
+  // Matches: float name = 0;
+  cleanedCode = cleanedCode.replace(/\bfloat\s+(\w+)\s*=\s*0\s*;/g, "float $1 = 0.0;");
+
   return `${HLSL_PREAMBLE}\n${cleanedCode}`;
 };
