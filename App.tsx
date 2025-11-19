@@ -4,7 +4,7 @@ import Preview from './components/Preview';
 import UniformControls from './components/UniformControls';
 import { DEFAULT_SHADER_CODE, UniformDefinition } from './types';
 import { parseUniforms } from './utils/shaderUtils';
-import { Sparkles, Code2, AlertCircle, Loader2, Undo2, Redo2 } from 'lucide-react';
+import { Sparkles, Code2, AlertCircle, Loader2, Undo2, Redo2, RefreshCcw } from 'lucide-react';
 import { generateShaderCode } from './services/geminiService';
 
 function App() {
@@ -15,6 +15,7 @@ function App() {
 
   // Current Code State
   const [code, setCode] = useState(DEFAULT_SHADER_CODE);
+  const [reloadKey, setReloadKey] = useState(0);
   
   const [uniforms, setUniforms] = useState<UniformDefinition[]>([]);
   const [splitPos, setSplitPos] = useState(50); // Percentage
@@ -59,24 +60,10 @@ function App() {
       });
       
       setHistoryIndex(prev => {
-        // This is slightly tricky because we don't know for sure if the setHistory above added an item 
-        // without accessing the new state. 
-        // Ideally we would do this atomically, but for this simple app, 
-        // we can assume if we are in this timeout, and the code changed, we increment.
-        // To be safe, we can check the history in the next render or just logic here.
-        // However, since we can't access the *result* of setHistory immediately, 
-        // we will assume success if code !== last history.
         return prev + 1; 
       });
     }, 750);
   };
-
-  // Synchronize history index if we drifted due to rapid updates or other issues? 
-  // No, simpler to just handle index increments correctly. 
-  // Refined approach for history update:
-  useEffect(() => {
-    // Use an effect to correct history index if needed? No, keep it manual.
-  }, []);
 
   // Override history set for "Hard" updates (Undo/Redo/AI)
   const pushHistoryImmediate = (newCode: string) => {
@@ -171,6 +158,10 @@ function App() {
     }
   };
 
+  const handleReload = () => {
+    setReloadKey(prev => prev + 1);
+  };
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden text-white font-sans selection:bg-blue-500/30">
       
@@ -186,9 +177,9 @@ function App() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
            {/* Undo / Redo Controls */}
-           <div className="flex items-center bg-gray-900 rounded-lg p-1 border border-gray-800 mr-2">
+           <div className="flex items-center bg-gray-900 rounded-lg p-1 border border-gray-800">
               <button 
                 onClick={handleUndo} 
                 disabled={historyIndex === 0 && code === history[0]}
@@ -208,10 +199,18 @@ function App() {
               </button>
            </div>
 
+           <button 
+              onClick={handleReload}
+              className="p-2 bg-gray-900 border border-gray-800 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors shadow-sm"
+              title="Restart Preview"
+            >
+              <RefreshCcw size={16} />
+           </button>
+
            {error && (
-             <div className="flex items-center gap-2 text-red-400 bg-red-900/20 px-3 py-1 rounded border border-red-900/50 text-xs">
+             <div className="flex items-center gap-2 text-red-400 bg-red-900/20 px-3 py-1.5 rounded border border-red-900/50 text-xs">
                <AlertCircle size={14} />
-               <span>Compilation Error</span>
+               <span>Error</span>
              </div>
            )}
           <button 
@@ -254,6 +253,7 @@ function App() {
         {/* Preview Panel */}
         <div style={{ width: `${100 - splitPos}%` }} className="h-full relative min-w-[200px] bg-black">
            <Preview 
+              key={reloadKey}
               code={code} 
               uniforms={uniforms} 
               onError={setError} 
