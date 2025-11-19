@@ -1,0 +1,5 @@
+{
+  "name": "Lumina Shader Lab",
+  "description": "A high-performance real-time HLSL/GLSL shader previewer with automatic uniform inference and AI-powered code generation.",
+  "requestFramePermissions": []
+}
